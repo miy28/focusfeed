@@ -5,13 +5,13 @@ from aggregator.data_models import FeedNote
 
 load_dotenv(find_dotenv())
 
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-def fetch_newsapi_articles(query: str = "SpaceX") -> list[FeedNote]:
-    url = f"https://newsapi.org/v2/everything?q={query}&apiKey={NEWS_API_KEY}"
+def fetch_googleapi_articles(query: str = "SpaceX") -> list[FeedNote]:
+    url = f"https://news.google.com/rss/search?q={query}&apiKey={GOOGLE_API_KEY}"
     resp = requests.get(url)
     if not resp.ok:
-        print(f"Error fetching NewsAPI data: {resp.status_code}")
+        print(f"Error fetching Google News data: {resp.status_code}")
         return []
     
     data = resp.json()
@@ -22,9 +22,9 @@ def fetch_newsapi_articles(query: str = "SpaceX") -> list[FeedNote]:
         note = FeedNote(
             title=article.get("title", "No Title"),
             content=article.get("description", "No Content"),
-            url=article.get("url", ""),
-            timestamp=article.get("publishedAt", ""),
-            source="NewsAPI",
+            url=article.get("link", ""),
+            timestamp=article.get("published", ""),
+            source="GoogleAPI", 
             extra_data=article
         )
         articles.append(note)
@@ -32,4 +32,4 @@ def fetch_newsapi_articles(query: str = "SpaceX") -> list[FeedNote]:
 
 if __name__ == "__main__":
     from rich.pretty import pprint
-    pprint(fetch_newsapi_articles())
+    pprint(fetch_googleapi_articles())

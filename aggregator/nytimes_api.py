@@ -1,9 +1,11 @@
 import os
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from aggregator.data_models import FeedNote
 
-load_dotenv() #env vars
+# load_dotenv(dotenv_path="../endpoint_tests/.env") #env vars
+
+load_dotenv(find_dotenv())
 
 NY_TIMES_KEY = os.getenv("NY_TIMES_KEY")
 

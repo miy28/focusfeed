@@ -1,5 +1,7 @@
+from flask import Flask, Blueprint, jsonify, request
 from aggregator.nytimes_api import fetch_nytimes_articles
 from aggregator.news_api import fetch_newsapi_articles
+from aggregator.google_api import fetch_googleapi_articles
 
 def aggregate_feed(query: str = "SpaceX"): #query will be user defined in the future
     feed_notes = []
@@ -17,11 +19,45 @@ def aggregate_feed(query: str = "SpaceX"): #query will be user defined in the fu
         feed_notes.extend(newsapi_notes)
     except Exception as e:
         print(f"Error aggregating NewsAPI data: {e}")
+
+    # GoogleNews pull
+
+    try:
+        googleapi_notes = fetch_googleapi_articles(query)
+        feed_notes.extend(googleapi_notes)
+    except Exception as e:
+        print(f"Error aggregating GoogleNews data: {e}")
     
     # Add more 
     
     return feed_notes
 
+def get_feed():
+    # pull query, def is "SpaceX"
+    # query = request.args.get("query", "SpaceX")
+    
+    # call aggregator
+    feed_notes = aggregate_feed("SpaceX")
+    
+    # feednote dict conversion
+    result = []
+    for note in feed_notes:
+        result.append({
+            "title": note.title,
+            "content": note.content,
+            "url": note.url,
+            "timestamp": note.timestamp,
+            "source": note.source
+        })
+    
+    #simple json output for now
+    return jsonify(result)
+
 if __name__ == "__main__":
     from rich.pretty import pprint
-    pprint(aggregate_feed("SpaceX"))
+    # pprint(aggregate_feed("SpaceX"))
+    # print("here")
+    app = Flask(__name__)
+    
+    with app.app_context():
+        print(get_feed())
