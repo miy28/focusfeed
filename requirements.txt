@@ -4,5 +4,6 @@ rich
 flask
 feedparser
 pymysql
+git-filter-repo
 
 ###dependencies
