@@ -1,0 +1,8 @@
+CREATE TABLE FeedNotes (
+    noteId INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT,
+    title VARCHAR(200),
+    keyword VARCHAR(200),
+    url VARCHAR(200),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

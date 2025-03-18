@@ -29,6 +29,7 @@ def fetch_nytimes_articles(query: str = "SpaceX") -> list[FeedNote]:
             url=doc.get("web_url", ""),
             timestamp=doc.get("pub_date", ""),
             source="NYTimes",
+            keyword=doc.get("keyword", {}).get("name", "No Keyword"),
             extra_data=doc
         )
         articles.append(note)
