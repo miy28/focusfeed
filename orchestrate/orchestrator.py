@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     # ascii_banner = pyfiglet.figlet_format("FocusFeed")
     # printf(ascii_banner)
-    print(r""""[bold red]
+    print(r""""[red]
             .,-:;//;:=,
           . :H@@@MM@M#H/.,+%;,
        ,/X+ +M@@M@MM%=,-%HMMM@X/,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
        =%@M@M#@$-.=$@MM@@@M; %M%=
          ,:+$+-,/H#MMMMMMM@= =,
                =++%%%%+/:-.
-    [/bold red]""")
+    [/red]""")
 
     print("[bold cyan]Welcome to FocusFeed homepage.[/bold cyan]")
     print("[bold cyan] To get things started, what are some of your favorite topics?\n Please give at least one string to get things started.[/bold cyan]")
