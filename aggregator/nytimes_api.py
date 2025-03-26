@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from dotenv import load_dotenv, find_dotenv
 from aggregator.data_models import FeedNote
@@ -14,7 +15,8 @@ def fetch_nytimes_articles(query: str = "SpaceX") -> list[FeedNote]:
     url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?q={query}&api-key={NY_TIMES_KEY}"
     resp = requests.get(url)
     if not resp.ok:
-        print(f"Error fetching NYTimes data: {resp.status_code}")
+        print(f"\n\nError fetching NYTimes data: Code {resp.status_code} (Probably time-out.)\n")
+        sys.stdout.write('\033[F\033[F\033[F\033[F') # ANSI (move cursor up thrice)
         return []
     
     data = resp.json()

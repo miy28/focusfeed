@@ -5,5 +5,7 @@ flask
 feedparser
 pymysql
 git-filter-repo
+pyfiglet
+google-genai
 
 ###dependencies
