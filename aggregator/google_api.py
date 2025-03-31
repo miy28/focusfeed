@@ -1,13 +1,13 @@
 import os
 import requests
 from dotenv import load_dotenv, find_dotenv
-from aggregator.data_models import FeedNote
+from aggregator.data_models import ArticleIterator
 
 load_dotenv(find_dotenv())
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-def fetch_googleapi_articles(query: str = "SpaceX") -> list[FeedNote]:
+def fetch_googleapi_articles(query: str = "SpaceX") -> list[ArticleIterator]:
     url = f"https://news.google.com/rss/search?q={query}&apiKey={GOOGLE_API_KEY}"
     resp = requests.get(url)
     if not resp.ok:
@@ -17,11 +17,11 @@ def fetch_googleapi_articles(query: str = "SpaceX") -> list[FeedNote]:
     data = resp.json()
     articles = []
 
-    # populate feednote w get req 
+    # populate ArticleIterator w get req 
     for article in data.get("articles", []):
-        note = FeedNote(
+        note = ArticleIterator(
             title=article.get("title", "No Title"),
-            content=article.get("description", "No Content"),
+            desc=article.get("description", "No Content"),
             url=article.get("link", ""),
             timestamp=article.get("published", ""),
             source="GoogleAPI", 

@@ -1,13 +1,13 @@
 import os
 import requests
 from dotenv import load_dotenv, find_dotenv
-from aggregator.data_models import FeedNote
+from aggregator.data_models import ArticleIterator
 
 load_dotenv(find_dotenv())
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
-def fetch_newsapi_articles(query: str = "SpaceX") -> list[FeedNote]:
+def fetch_newsapi_articles(query: str = "SpaceX") -> list[ArticleIterator]:
     url = f"https://newsapi.org/v2/everything?q={query}&apiKey={NEWS_API_KEY}"
     resp = requests.get(url)
     if not resp.ok:
@@ -17,11 +17,11 @@ def fetch_newsapi_articles(query: str = "SpaceX") -> list[FeedNote]:
     data = resp.json()
     articles = []
 
-    # populate feednote w get req 
+    # populate ArticleIterator w get req 
     for article in data.get("articles", []):
-        note = FeedNote(
+        note = ArticleIterator(
             title=article.get("title", "No Title"),
-            content=article.get("description", "No Content"),
+            desc=article.get("description", "No Content"),
             url=article.get("url", ""),
             timestamp=article.get("publishedAt", ""),
             source="NewsAPI",

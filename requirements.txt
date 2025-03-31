@@ -7,5 +7,6 @@ pymysql
 git-filter-repo
 pyfiglet
 google-genai
+nltk
 
 ###dependencies

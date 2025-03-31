@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
 
 @dataclass
-class FeedNote: #feednote struct
+class ArticleIterator: # previously FeedNote struct
     # noteId: int
     title: str
-    content: str
+    desc: str
     url: str
     timestamp: str
     source: str
-    keyword: str
+    keywords: list[str]
+    snippet: str
     extra_data: dict = field(default_factory=dict)

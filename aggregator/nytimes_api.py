@@ -2,7 +2,7 @@ import os
 import sys
 import requests
 from dotenv import load_dotenv, find_dotenv
-from aggregator.data_models import FeedNote
+from aggregator.data_models import ArticleIterator
 
 # load_dotenv(dotenv_path="../endpoint_tests/.env") #env vars
 
@@ -10,7 +10,7 @@ load_dotenv(find_dotenv())
 
 NY_TIMES_KEY = os.getenv("NY_TIMES_KEY")
 
-def fetch_nytimes_articles(query: str = "SpaceX") -> list[FeedNote]:
+def fetch_nytimes_articles(query: str = "SpaceX") -> list[ArticleIterator]:
 
     url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?q={query}&api-key={NY_TIMES_KEY}"
     resp = requests.get(url)
@@ -23,15 +23,17 @@ def fetch_nytimes_articles(query: str = "SpaceX") -> list[FeedNote]:
     articles = []
 
 
-    # // populate feednote w data
+    # populate ArticleIterator w data
     for doc in data.get("response", {}).get("docs", []):
-        note = FeedNote(
+        note = ArticleIterator(
             title=doc.get("headline", {}).get("main", "No Title"),
-            content=doc.get("abstract", "No Content"),
+            desc=doc.get("abstract", "No Content"),
             url=doc.get("web_url", ""),
             timestamp=doc.get("pub_date", ""),
             source="NYTimes",
-            keyword=doc.get("keyword", {}).get("name", "No Keyword"),
+            # keyword=doc.get("keyword", {}).get("name", "No Keyword"),
+            keywords=doc.get("keywords", "No Keyword"),
+            snippet=doc.get("snippet", "No Snippet"),
             extra_data=doc
         )
         articles.append(note)

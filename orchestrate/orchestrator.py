@@ -29,9 +29,19 @@ def fetch_articles():
         nytimes_notes = fetch_nytimes_articles(category) # list of notes
         # add the other apis here once they're implemented
 
+        print("\n\n\nGot", len(nytimes_notes), "articles per call to nytimes.search")
+
         if nytimes_notes:
-            note = random.choice(nytimes_notes) # pick one to display to the feed
-            summary = gemini(note.title)
+            note = random.choice(nytimes_notes) # pick one to display to the feedv 
+            summary = gemini(note.desc)
+
+            keyword_values = []
+            for keyword in note.keywords:
+                print(keyword['value'])
+                keyword_values.append(keyword["value"])
+            
+            print(len(keyword_values))
+
             feed.append(f'Article: "{note.title}".') # display a few random articles from user's top k categories
             feed.append(f'Summary: {summary}') # gemini summary
             # new_interaction(note) # send this to the db (simulate an interaction)

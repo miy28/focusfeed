@@ -44,7 +44,7 @@ def create_table():
 
     cursor = conn.cursor()
 
-    with open("sql/query_note_create.sql", "r", encoding="utf-8") as file:
+    with open("sql/feednotes_create.sql", "r", encoding="utf-8") as file:
         sql_query = file.read().strip()
 
     cursor.execute(sql_query)
