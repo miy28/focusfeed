@@ -1,5 +1,6 @@
 from flask import Flask, Blueprint, jsonify, request
-from aggregator.core import aggregate_feed
+from core.core import aggregate_feed
+from core.orchestrator import fetch_articles
 
 # blueprint for frontend endpoints
 visualizer = Blueprint("visualization", __name__)

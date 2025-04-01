@@ -2,9 +2,7 @@ import os
 import sys
 import requests
 from dotenv import load_dotenv, find_dotenv
-from aggregator.data_models import ArticleIterator
-
-# load_dotenv(dotenv_path="../endpoint_tests/.env") #env vars
+from core.data_models import ArticleIterator
 
 load_dotenv(find_dotenv())
 

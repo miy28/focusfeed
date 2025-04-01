@@ -1,5 +1,5 @@
 from flask import Flask
-from visualization.web_visualization import visualizer
+from web.web_visualization import visualizer
 
 def create_app():
     app = Flask(__name__)

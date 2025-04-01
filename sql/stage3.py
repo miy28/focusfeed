@@ -5,10 +5,10 @@ from nltk.corpus import words as nltk_words
 from datetime import datetime
 import pymysql
 
-from aggregator.nytimes_api import fetch_nytimes_articles
-from aggregator.google_api import fetch_googleapi_articles
-from aggregator.news_api import fetch_newsapi_articles
-from user_preferences.categories import get_top_categories
+from api.nytimes_api import fetch_nytimes_articles
+from api.google_api import fetch_googleapi_articles
+from api.news_api import fetch_newsapi_articles
+from recommender.categories import get_top_categories
 from llm.gemini import gemini
 
 with open("db_credentials.txt", "r", encoding="utf-8") as file:

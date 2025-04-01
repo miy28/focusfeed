@@ -6,8 +6,8 @@ from pyfiglet import Figlet
 import pymysql
 
 
-from aggregator.nytimes_api import fetch_nytimes_articles
-from user_preferences.categories import get_top_categories
+from api.nytimes_api import fetch_nytimes_articles
+from recommender.categories import get_top_categories
 from sql.db import new_interaction, create_table
 from llm.gemini import gemini
 

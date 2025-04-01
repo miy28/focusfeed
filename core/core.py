@@ -1,7 +1,7 @@
 from flask import Flask, Blueprint, jsonify, request
-from aggregator.nytimes_api import fetch_nytimes_articles
-from aggregator.news_api import fetch_newsapi_articles
-from aggregator.google_api import fetch_googleapi_articles
+from api.nytimes_api import fetch_nytimes_articles
+from api.news_api import fetch_newsapi_articles
+from api.google_api import fetch_googleapi_articles
 
 def aggregate_feed(query: str = "SpaceX"): #query will be user defined in the future
     feed_notes = []
