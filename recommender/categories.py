@@ -15,6 +15,8 @@ def get_top_categories(n, categories_vocab):
     # categories_vocab["Cooking"] = 1
     # categories_vocab["Matcha"] = 1
 
+    categories_vocab["nvidia"] = 1
+
     vocab_size = len(set(categories_vocab.keys()))
     neg_size = sum(categories_vocab.values())
 

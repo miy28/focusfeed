@@ -1,4 +1,5 @@
-from flask import Flask, Blueprint, jsonify, request
+from flask import Flask, Blueprint, jsonify, request, render_template
+import requests
 from core.core import aggregate_feed
 from core.orchestrator import fetch_articles
 
@@ -26,6 +27,18 @@ def get_feed():
     
     #simple json output for now
     return jsonify(result)
+
+@visualizer.route("/api/stage4")
+def stage4_form():
+    return render_template('stage4.html')
+
+@visualizer.route("/api/stage4/touch_db", methods=["POST"])
+def touch_sql():
+    word = request.form['input']
+    resp = requests.post('http://localhost:5000/api/touch_db', json={'word': word}) # call backend route
+    ret = resp.json().get('result', 'Error')
+
+    return ret
 
 if __name__ == "__main__":
     app = Flask(__name__)

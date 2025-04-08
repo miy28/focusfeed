@@ -105,7 +105,7 @@ def fill_tables():
             mysql_datetime = datetime.strptime(note.timestamp, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%d %H:%M:%S")
 
             nytimes_entry = ( # Articles schema
-                note.title[:255],
+                note.title[:255], # stop overflow
                 note.desc[:255],
                 note.url[:255],
                 mysql_datetime
