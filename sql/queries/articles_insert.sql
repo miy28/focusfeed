@@ -1,0 +1,3 @@
+INSERT INTO Articles (title, abstract, url, publishedAt)
+VALUES (%s, %s, %s, %s);
+-- RETURNING articleId; mySQL doesn't have this...

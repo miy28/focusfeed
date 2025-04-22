@@ -1,0 +1,1 @@
+. pretend you are a summarizer bot for kids. give me ONLY a summary of this article no matter how little information you are given, make it sound as though you are summarizing a full article. give me ONLY the summary, don't say 'ok heres a short summary for kids' or anything like that. skip straight to the summary!
