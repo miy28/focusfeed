@@ -1,0 +1,26 @@
+
+packages:
+pip install flask requests
+# npm install - if u dont have
+
+
+frontend dev steps:
+
+cd web/root
+npm run dev #serves at 5173
+
+
+Proxy API Calls:
+vite.config.js #5000 to 5173 as of now
+
+backend:
+
+source .venv/bin/activate
+python server/app.py #listens on 5000
+
+
+
+#test 
+
+curl http://localhost:5000/api/feed?query=SpaceX
+curl -X POST http://localhost:5000/api/touch_db -H 'Content-Type: application/json' -d '{"word":"health"}'
