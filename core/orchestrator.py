@@ -5,111 +5,76 @@ import pyfiglet
 from pyfiglet import Figlet
 import pymysql
 
-
 from api.nytimes_api import fetch_nytimes_articles
+from core.data_models import ArticleIterator, FeedNote
 from recommender.categories import get_top_categories
 from sql.db import new_interaction, create_table
 from llm.gemini import gemini
+from recommender.recommender import model_w2v, get_embedding
+from recommender.data_models import get_pkl, save_pkl, VDB_PATH, VQ_PATH, MAX_WINDOW_LEN
 
-# bag of words NLP approach?
-categories_vocab = {} # holds user history. {keyword: count}
+categories_vocab = {} # (for debugging) holds user history.
 
-def fetch_articles():
-    categories = get_top_categories(5, categories_vocab)
-    feed = []
+def fetch_articles(query):
+    '''
+    fetch new articles, might not be in sql db
+    gets at most 10 articles
+    '''
+    articles = fetch_nytimes_articles(query)
 
-    for i, category in enumerate(categories): # fancy stuff :3
-        sys.stdout.write(f'\nFetching articles from category "{category}"...\n')
-        sys.stdout.write('\033[F\033[F') # ANSI (move cursor up twice)
-        draw_bar(i+1, len(categories))
-        # draw_fetch()
-        # sys.stdout.write('\n')
-        sys.stdout.flush()
+    if articles:
+        return articles
+    
+def lookup_articles(query1, query2, N=10):
+    '''
+    look up articles in sql db. two keywords improves specificity of the search.
+    gets at most 10 articles
+    '''
 
-        nytimes_notes = fetch_nytimes_articles(category) # list of notes
-        # add the other apis here once they're implemented
+    articles = []
+    
+    # (run sql lookup get max 10 items. of articles that have both query1 and query2 as keywords
+    # make it return title, desc, url, timestamp, source, keywords, snippet, extra_data)
+    sql_response = None
 
-        print("\n\n\nGot", len(nytimes_notes), "articles per call to nytimes.search")
+    for article in sql_response:
+        note = ArticleIterator(
+            title=article[0],
+            desc=article[1],
+            url=article[2],
+            timestamp=article[3],
+            source=article[4],
+            keywords=article[5],
+            snippet=article[6],
+            extra_data=article[7]
+        )
+        articles.append(note)
 
-        if nytimes_notes:
-            note = random.choice(nytimes_notes) # pick one to display to the feedv 
-            summary = gemini(note.desc)
+    return articles
 
-            keyword_values = []
-            for keyword in note.keywords:
-                print(keyword['value'])
-                keyword_values.append(keyword["value"])
-            
-            print(len(keyword_values))
+def stage_keyword(keyword, vq): # backend -> middle
+    embedding = get_embedding(model_w2v, keyword)
+    vq.append((embedding, keyword))
 
-            feed.append(f'Article: "{note.title}".') # display a few random articles from user's top k categories
-            feed.append(f'Summary: {summary}') # gemini summary
-            # new_interaction(note) # send this to the db (simulate an interaction)
-        else:
-            feed.append(f'Could not find articles about "{category}". Sorry about that!')
+def generate_feednote(ait):
+    title = ait.title
+    summary = gemini(ait.desc) # rag
+    url = ait.url
 
-    print("[bold purple]\n\n\nHere is your starter NewsFeed![/bold purple]")
+    note = FeedNote(
+        title=title,
+        summary=summary,
+        url=url,
+    )
+
+    return note
+
+def generate_feed(mood):
+    feed = [] # list of FeedNotes
+
+    
 
     return feed
 
-def draw_bar(iteration, total, category="category", bar_length=50):
-    total = max(total, 1)
-    percent = "{0:.1f}".format(100 * (iteration / float(total)))
-    filled_length = int(bar_length * iteration // total)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
-    sys.stdout.write(f'\rProgress: |{bar}| {percent}% complete.')
-    sys.stdout.flush()
-
-def draw_fetch():
-    sys.stdout.write(f'\nFetching articles from category "{category}".\n')
-    sys.stdout.flush()
-
 if __name__ == "__main__":
-    from rich import print
-    from rich.pretty import pprint
-
-    # create_table()
-
-    # ascii_banner = pyfiglet.figlet_format("FocusFeed")
-    # printf(ascii_banner)
-    print(r""""[red]
-            .,-:;//;:=,
-          . :H@@@MM@M#H/.,+%;,
-       ,/X+ +M@@M@MM%=,-%HMMM@X/,
-     -+@MM; $M@@MH+-,;XMMMM@MMMM@+-
-    ;@M@@M- XM@X;. -+XXXXXHHH@M@M#@/.
-  ,%MM@@MH ,@%=             .---=-=:=,.
-  =@#@@@MX.,                -%HX$$%%%:;
- =-./@M@M$                   .;@MMMM@MM:
- X@/ -$MM/                    . +MM@@@M$
-,@M@H: :@:         FF         . =X#@@@@-
-,@@@MMX, .                    /H- ;@M@M=
-.H@@@@M@+,                    %MM+..%#$.
- /MMMM@MMH/.                  XM@MH; =;
-  /%+%$XHH@$=              , .H@@@@MX,
-   .=--------.           -%H.,@@@@@MX,
-   .%MM@@@HHHXX$$$%+- .:$MMX =M@@MM%.
-     =XMMM@MM@MM#H;,-+HMM@M+ /MMMX=
-       =%@M@M#@$-.=$@MM@@@M; %M%=
-         ,:+$+-,/H#MMMMMMM@= =,
-               =++%%%%+/:-.
-    [/red]""")
-
-    print("[bold cyan]Welcome to FocusFeed homepage.[/bold cyan]")
-    print("[bold cyan] To get things started, what are some of your favorite topics?\n Please give at least one string to get things started.[/bold cyan]")
-    print("[bold cyan]Keep in mind, some topics may not yield any articles if they are not relevant enough.[/bold cyan]")
-
-    init_categories = []
-    while True:
-        category = input()
-        if category:
-            init_categories.append(category)
-        else:
-            break
-    
-    for category in init_categories:
-        if category in categories_vocab:
-            categories_vocab[category] += 1
-        categories_vocab[category] = 1
-    
-    pprint(fetch_articles())
+    print("arnav")

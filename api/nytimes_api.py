@@ -5,11 +5,9 @@ from dotenv import load_dotenv, find_dotenv
 from core.data_models import ArticleIterator
 
 load_dotenv(find_dotenv())
-
 NY_TIMES_KEY = os.getenv("NY_TIMES_KEY")
 
 def fetch_nytimes_articles(query: str = "SpaceX") -> list[ArticleIterator]:
-
     url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?q={query}&api-key={NY_TIMES_KEY}"
     resp = requests.get(url)
     if not resp.ok:
@@ -19,7 +17,6 @@ def fetch_nytimes_articles(query: str = "SpaceX") -> list[ArticleIterator]:
     
     data = resp.json()
     articles = []
-
 
     # populate ArticleIterator w data
     for doc in data.get("response", {}).get("docs", []):
@@ -35,6 +32,7 @@ def fetch_nytimes_articles(query: str = "SpaceX") -> list[ArticleIterator]:
             extra_data=doc
         )
         articles.append(note)
+    
     return articles
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import os
 from flask import Flask, send_from_directory, jsonify, request
 from web.flask_web import visualizer
-from core.orchestrator import fetch_articles
+from core.orchestrator import fetch_articles, stage_keyword
 from sql.stage4 import touch_db
 
 app = Flask(__name__, static_folder='../web/root/dist')
@@ -31,6 +31,12 @@ def touch_sql():
     else:
         response = f"Generated new FeedNote @ id {noteId}. {summary}"
     return jsonify({'result': response})
+    
+@app.route('api/log_interaction')
+async def log_interaction(ait):
+    keywords = ait.keywords
+    for keyword in keywords:
+        stage_keyword(keyword)
 
 if __name__ == "__main__":
     # app = create_app()
