@@ -1,4 +1,22 @@
 
+
+
+
+
+"""
+Search Overview:
+- endpoint to be run when user clicks the Search button in frontend
+- returns a json list of articles
+"""
+class Search:
+	def __init__():
+		pass
+
+class DBManager:
+	def __init__():
+		pass
+
+
 class Recommender:
 	def __init__():
 		pass
@@ -8,8 +26,13 @@ class Recommender:
 
 	
 
+gcloud auth login
+gcloud sql connect focusfeed-db --user=root
+gcloud sql connect focusfeed-db --user=root --password=gargalicious
 
-gcloud sql connect focusfeed-db --user=root --password=gargilicous
+USE focusfeed-db-test;
+SHOW TABLES;
+
 
 
 /focusfeed/get_top_feed_notes/{item}

@@ -8,5 +8,6 @@ git-filter-repo
 pyfiglet
 google-genai
 nltk
+flasgger
 
 ###dependencies
