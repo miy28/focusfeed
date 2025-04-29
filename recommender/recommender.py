@@ -12,11 +12,33 @@ class SearchBar:
         self.db_manager = DBManager(host=HOST, database=DATBASE, user=USER, password=PASSWORD)
         
     def semantic_search(self, articles_list, key_phrase, top_n=5):
+        # Create dictionaries to store unique articles by articleId and url
+        unique_articles = {}
         search_texts = []
+        article_map = {}  # Map to store index → article key relationships
+        
+        # Process articles, keeping only unique ones by articleId and url
+        article_index = 0
         for article in articles_list:
+            article_id = article['articleId']
+            article_url = article['url']
+            
+            # Create a unique key for each article
+            article_key = f"{article_id}_{article_url}"
+            
+            # Skip if we've already processed this article by ID or URL
+            if article_id in unique_articles or article_url in [a['url'] for a in unique_articles.values()]:
+                continue
+                
+            unique_articles[article_id] = article
             combined_text = f"{article['title']} {article['keyword']}"
             search_texts.append(combined_text)
+            article_map[len(search_texts) - 1] = article_id  # Store the mapping
         
+        # If no unique articles found
+        if not search_texts:
+            return []
+            
         all_texts = [key_phrase] + search_texts
         
         vectorizer = TfidfVectorizer(stop_words='english')
@@ -28,15 +50,22 @@ class SearchBar:
         key_phrase_vector = tfidf_matrix[0:1]
         article_vectors = tfidf_matrix[1:]
         similarities = cosine_similarity(key_phrase_vector, article_vectors)[0]
-        article_similarities = [(articles_list[i], similarities[i]) for i in range(len(articles_list))]
+        
+        # Create article-similarity pairs with unique articles
+        article_similarities = []
+        for i, score in enumerate(similarities):
+            article_id = article_map[i]
+            article_similarities.append((unique_articles[article_id], score))
         
         article_similarities.sort(key=lambda x: x[1], reverse=True)
         top_articles = article_similarities[:top_n]
+        
         result = []
         for article, score in top_articles:
             article_copy = article.copy()
             article_copy['similarity_score'] = float(score)
             result.append(article_copy)
+            
         return result
     
     def search_articles(self, key_phrase, top_n=5):
