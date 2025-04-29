@@ -4,9 +4,9 @@ from sql.constants import *
 from rich.pretty import pprint
 
 if __name__ == "__main__":
-	search = SearchBar(phrase="Ukraine")
-	x = search.find_articles()
-	print(x)
+	search = SearchBar()
+	x = search.search_articles(key_phrase="Ukraine")
+	pprint(x)
 
 	# x = search.get_articleIds()
 	# pprint(x[0])
