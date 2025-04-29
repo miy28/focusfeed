@@ -2,10 +2,6 @@ import mysql.connector
 from mysql.connector import Error
 from typing import List, Dict, Any, Tuple, Optional, Union
 
-host = ''
-user = 'root'
-password = ''
-database = 'focusfeed-db-test'
 class DBManager:
     def __init__(self, host: str, database: str, user: str, password: str, port: int = 3306):
         self.host = host
@@ -13,6 +9,7 @@ class DBManager:
         self.user = user
         self.password = password
         self.port = port
+        
         self.connection = None
         self.cursor = None
 
@@ -30,7 +27,6 @@ class DBManager:
                 return True
         except Error as e:
             print(f"Error connecting to MySQL: {e}")
-        
         return False
 
     def disconnect(self) -> None:
@@ -46,7 +42,6 @@ class DBManager:
             if not self.connection or not self.connection.is_connected():
                 if not self.connect():
                     return False
-            
             self.cursor.execute(query, params)
             self.connection.commit()
             return True
@@ -150,14 +145,7 @@ class DBManager:
         query = f"DESCRIBE {table_name}"
         return self.fetch_all(query)
 
-
-# import pymysql
-
-# host = ''
-# user = 'root'
-# password = ''
-# database = 'focusfeed-db-test'
-
+# OLD STUFF DONT USE THIS PYSQL IS FOR POSTGRES
 # userId = 1
 
 # def new_interaction(note):
@@ -186,16 +174,6 @@ class DBManager:
 
 #     cursor.close()
 #     conn.close()
-
-# def create_table():
-#     conn = pymysql.connect(
-#         host=host,
-#         user=user,
-#         password=password,
-#         database=database
-#     )
-
-#     cursor = conn.cursor()
 
 #     with open("sql/feednotes_create.sql", "r", encoding="utf-8") as file:
 #         sql_query = file.read().strip()

@@ -3,11 +3,13 @@ python-dotenv
 rich
 flask
 feedparser
-pymysql
 git-filter-repo
 pyfiglet
 google-genai
 nltk
 flasgger
+rich
 
-###dependencies
+mysql-connector-python
+pymysql
+sqlalchemy
