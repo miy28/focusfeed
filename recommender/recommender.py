@@ -12,30 +12,25 @@ class SearchBar:
         self.db_manager = DBManager(host=HOST, database=DATBASE, user=USER, password=PASSWORD)
         
     def semantic_search(self, articles_list, key_phrase, top_n=5):
-        # Create dictionaries to store unique articles by articleId and url
         unique_articles = {}
         search_texts = []
-        article_map = {}  # Map to store index → article key relationships
+        article_map = {}  
         
-        # Process articles, keeping only unique ones by articleId and url
         article_index = 0
         for article in articles_list:
             article_id = article['articleId']
             article_url = article['url']
             
-            # Create a unique key for each article
             article_key = f"{article_id}_{article_url}"
             
-            # Skip if we've already processed this article by ID or URL
             if article_id in unique_articles or article_url in [a['url'] for a in unique_articles.values()]:
                 continue
                 
             unique_articles[article_id] = article
             combined_text = f"{article['title']} {article['keyword']}"
             search_texts.append(combined_text)
-            article_map[len(search_texts) - 1] = article_id  # Store the mapping
+            article_map[len(search_texts) - 1] = article_id 
         
-        # If no unique articles found
         if not search_texts:
             return []
             
@@ -51,7 +46,6 @@ class SearchBar:
         article_vectors = tfidf_matrix[1:]
         similarities = cosine_similarity(key_phrase_vector, article_vectors)[0]
         
-        # Create article-similarity pairs with unique articles
         article_similarities = []
         for i, score in enumerate(similarities):
             article_id = article_map[i]
