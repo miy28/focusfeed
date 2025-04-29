@@ -1,6 +1,9 @@
 import mysql.connector
 from mysql.connector import Error
 from typing import List, Dict, Any, Tuple, Optional, Union
+from rich.pretty import pprint
+
+from sql.constants import *
 
 class DBManager:
     def __init__(self, host: str, database: str, user: str, password: str, port: int = 3306):
@@ -36,6 +39,35 @@ class DBManager:
             self.connection.close()
             self.cursor = None
             self.connection = None
+    
+    def execute_procedure(self, procedure_call, params=None):
+        try:
+            if params:
+                self.cursor.callproc(procedure_call.replace("CALL ", "").split("(")[0], params)
+            else:
+                self.cursor.callproc(procedure_call.replace("CALL ", "").split("(")[0])
+            
+            results = []
+            for result in self.cursor.stored_results():
+                results.extend(result.fetchall())
+            
+            return results
+        except mysql.connector.Error as e:
+            print(f"Error executing stored procedure: {e}")
+            return []
+    
+    def execute_and_commit(self, query, params=None):
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            self.connection.commit()
+            return True
+        except mysql.connector.Error as e:
+            print(f"Error executing query: {e}")
+            self.connection.rollback()
+            return False
 
     def execute_query(self, query: str, params: tuple = None) -> bool:
         try:
@@ -144,6 +176,101 @@ class DBManager:
     def get_columns(self, table_name: str) -> List[Dict[str, Any]]:
         query = f"DESCRIBE {table_name}"
         return self.fetch_all(query)
+    
+    def show_all_triggers(self):
+        query = """
+        SELECT TRIGGER_NAME, EVENT_MANIPULATION, EVENT_OBJECT_TABLE, ACTION_STATEMENT
+        FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = %s
+        """
+        triggers = self.fetch_all(query, (DATBASE,))
+        
+        if not triggers:
+            print("No triggers found in the database.")
+        else:
+            print(f"Found {len(triggers)} triggers:")
+            for trigger in triggers:
+                print(f"\nName: {trigger['TRIGGER_NAME']}")
+                print(f"Event: {trigger['EVENT_MANIPULATION']} ON {trigger['EVENT_OBJECT_TABLE']}")
+                print(f"Statement: {trigger['ACTION_STATEMENT']}")
+        
+        return triggers
+    
+    def delete_all_triggers(self):
+        query = """
+        SELECT TRIGGER_NAME 
+        FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = %s
+        """
+        triggers = self.fetch_all(query, (DATBASE,))
+        
+        if not triggers:
+            print("No triggers found to delete.")
+            return True
+        
+        success = True
+        deleted_count = 0
+        
+        for trigger in triggers:
+            trigger_name = trigger['TRIGGER_NAME']
+            drop_query = f"DROP TRIGGER IF EXISTS {trigger_name}"
+            
+            try:
+                result = self.execute_query(drop_query)
+                if result:
+                    deleted_count += 1
+                    print(f"Deleted trigger: {trigger_name}")
+                else:
+                    print(f"Failed to delete trigger: {trigger_name}")
+                    success = False
+            except Exception as e:
+                print(f"Error deleting trigger {trigger_name}: {str(e)}")
+                success = False
+        
+        print(f"Deleted {deleted_count} out of {len(triggers)} triggers.")
+        return success
+
+def create_article_stats_table():
+    db_manager = DBManager(host=HOST, database=DATBASE, user=USER, password=PASSWORD)
+    
+    if not db_manager.connect():
+        print("Failed to connect to the database")
+        return False
+    
+    try:
+        query = """
+        CREATE TABLE IF NOT EXISTS ArticleStats (
+            articleId INT PRIMARY KEY,
+            likes_count INT DEFAULT 0,
+            dislikes_count INT DEFAULT 0,
+            FOREIGN KEY (articleId) REFERENCES Articles(articleId)
+        );
+        """
+        success = db_manager.execute_query(query)
+        
+        if success:
+            print("ArticleStats table created successfully!")
+            return True
+        else:
+            print("Failed to create ArticleStats table")
+            return False
+            
+    finally:
+        db_manager.disconnect()
+        print("Database connection closed")
+
+    
+if __name__ == "__main__":
+    dbm = DBManager(host=HOST, database=DATBASE, user=USER, password=PASSWORD)
+    tables = dbm.get_tables()
+    for x in tables:
+        pprint(x)
+        pprint(dbm.get_columns(table_name=x))
+    
+    pprint(dbm.show_all_triggers())
+    pprint(dbm.delete_all_triggers())
+
+
 
 # OLD STUFF DONT USE THIS PYSQL IS FOR POSTGRES
 # userId = 1

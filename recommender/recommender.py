@@ -77,6 +77,120 @@ class SearchBar:
         results = self.semantic_search(articles_list, key_phrase, top_n)
         return results
 
+class TinderInteraction:
+    def __init__(self):
+        self.db_manager = DBManager(host=HOST, database=DATBASE, user=USER, password=PASSWORD)
+        
+    def setup_article_stats_trigger(self):
+        check_query = """
+        SELECT TRIGGER_NAME FROM information_schema.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = %s AND TRIGGER_NAME = 'update_article_stats'
+        """
+        result = self.db_manager.fetch_one(check_query, (DATBASE,))
+        
+        if result:
+            print("Trigger already exists, dropping it first")
+            drop_query = "DROP TRIGGER IF EXISTS update_article_stats"
+            self.db_manager.execute_query(drop_query)
+                
+        trigger_query = """
+        CREATE TRIGGER update_article_stats
+        AFTER INSERT ON Interactions
+        FOR EACH ROW
+        BEGIN
+            DECLARE article_id INT;
+            
+            IF NEW.interactionType IN ('like', 'dislike') THEN
+                SET article_id = NEW.noteId;
+                
+                IF article_id IS NOT NULL THEN
+                    INSERT INTO ArticleStats 
+                        (articleId, likes_count, dislikes_count)
+                    VALUES 
+                        (article_id, 
+                        IF(NEW.interactionType = 'like', 1, 0),
+                        IF(NEW.interactionType = 'dislike', 1, 0))
+                    ON DUPLICATE KEY UPDATE
+                        likes_count = likes_count + IF(NEW.interactionType = 'like', 1, 0),
+                        dislikes_count = dislikes_count + IF(NEW.interactionType = 'dislike', 1, 0);
+                END IF;
+            END IF;
+        END
+        """
+        
+        try:
+            # Create the trigger
+            success = self.db_manager.execute_query(trigger_query)
+            if success:
+                print("Trigger created successfully")
+                return True
+            else:
+                print("Failed to create trigger")
+                return False
+        except Exception as e:
+            print(f"Error setting up trigger: {str(e)}")
+            return False
+      
+    def record_interaction(self, note_id, interaction_type):
+        query = """
+        INSERT INTO Interactions (userId, noteId, timestamp, interactionType, interactionDuration) 
+        VALUES (1, %s, NOW(), %s, 3.2)
+        """
+        self.db_manager.execute_query(query, (note_id, interaction_type))
+    
+    def get_user_interactions(self, user_id=1):
+        query = "SELECT * FROM Interactions WHERE userId = %s"
+        return self.db_manager.fetch_all(query, (user_id,))
+    
+    def get_all_article_stats(self):
+        query = """
+        SELECT * FROM ArticleStats
+        """
+        return self.db_manager.fetch_all(query)
+    
+    def get_article_stats(self, article_id):
+        query = """
+        SELECT * FROM ArticleStats WHERE articleId = %s
+        """
+        return self.db_manager.fetch_one(query, (article_id,))
+    
+    def get_popular_articles(self, limit=10):
+        query = """
+        SELECT a.*, s.likes_count, s.dislikes_count
+        FROM Articles a
+        JOIN ArticleStats s ON a.articleId = s.articleId
+        ORDER BY s.likes_count DESC
+        LIMIT %s
+        """
+        return self.db_manager.fetch_all(query, (limit,))
+    
+    def get_articles_with_stats(self):
+        query = """
+        SELECT 
+            a.articleId, 
+            a.title, 
+            a.abstract, 
+            a.url, 
+            a.publishedAt,
+            IFNULL(s.likes_count, 0) as likes_count,
+            IFNULL(s.dislikes_count, 0) as dislikes_count,
+            (IFNULL(s.likes_count, 0) - IFNULL(s.dislikes_count, 0)) as net_score
+        FROM 
+            Articles a
+        LEFT JOIN 
+            ArticleStats s ON a.articleId = s.articleId
+        ORDER BY 
+            net_score DESC, a.publishedAt DESC
+        """
+        return self.db_manager.fetch_all(query)
+
+    def ensure_article_exists(self, article_id):
+        check_query = "SELECT 1 FROM Articles WHERE articleId = %s"
+        result = self.db_manager.fetch_one(check_query, (article_id,))
+        if result:
+            return True # article exists
+        return False
+
 class Recommender:
 	def __init__():
 		pass
