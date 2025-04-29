@@ -1,5 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { fetchFeed, touchDB } from './services/api.js'
+// #import { fetchFeed, touchDB } from './services/api.js'
+
+
+async function fetchFeed(query) {
+  const res = await fetch(`/api/feed?query=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function touchDB(word) {
+  const res = await fetch(`/api/touch_db`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ word })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();  // { result: "…" }
+}
 
 // Sample feed notes for layout demonstration
 const sampleFeed = [
