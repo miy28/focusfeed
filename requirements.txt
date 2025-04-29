@@ -2,14 +2,11 @@ requests
 python-dotenv
 rich
 flask
-feedparser
-git-filter-repo
-pyfiglet
-google-genai
 nltk
 flasgger
 rich
-
+numpy
+scikit-learn
 mysql-connector-python
 pymysql
 sqlalchemy
